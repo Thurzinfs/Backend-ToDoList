@@ -1,130 +1,136 @@
 # ToDoList — API Backend
 
-API backend em Python (FastAPI) para gerenciamento de tarefas (ToDo). Projeto com foco em autenticação JWT (access + refresh tokens), CRUD de usuários e gerenciamento de tarefas por usuário.
+API em Python (FastAPI) para gerenciamento de tarefas (ToDo) com autenticação JWT (access + refresh tokens) e CRUD de usuários e tarefas.
 
 ## Índice
 - Visão geral
 - Tecnologias
-- Estrutura do projeto
+- Pré-requisitos
 - Variáveis de ambiente
-- Instalação
-- Execução
+- Instalação (local)
+- Uso com Docker
+- Estrutura do projeto
 - Endpoints principais
-- Modelos (resumo)
+- Observações de produção
 - Contribuição
+- Licença
 - Contato
 
 ## Visão geral
-
-Este repositório contém a API de backend do ToDoList. A aplicação expõe endpoints protegidos por JWT para operação sobre usuários e tarefas. O banco de dados é gerenciado com SQLAlchemy e as tabelas são criadas automaticamente via `Base.metadata.create_all(bind=engine)`.
+Backend RESTful que expõe endpoints protegidos por JWT. Usa SQLAlchemy para persistência; as tabelas são criadas automaticamente pelo projeto ao iniciar (veja `app/db/database.py`).
 
 ## Tecnologias
-
-- Python
+- Python 3.11
 - FastAPI
 - SQLAlchemy
-- SQLite/Postgres (via `DATABASE_URL`)
-- JWT (PyJWT)
+- PostgreSQL (recomendado em produção) / SQLite em desenvolvimento
+- Poetry (gerenciamento de dependências) ou `requirements.txt`
+- Uvicorn / Gunicorn (execução)
 
-Dependências principais estão em `requeriments.txt`.
-
-## Estrutura do projeto (resumida)
-
-- `app/main.py` — inicialização da aplicação e inclusão de routers
-- `app/core/` — configurações, segurança e handlers
-- `app/db/` — configuração do SQLAlchemy (`database.py`)
-- `app/models/` — modelos ORM (`User`, `Tarefa`)
-- `app/crud/` — routers para CRUD de usuários
-- `app/routers/` — routers adicionais (autenticação, listagem, tarefas)
-- `app/services/` — lógica de negócio para usuários e tarefas
-- `app/schemas/` — Pydantic schemas para requests/responses
+## Pré-requisitos
+- Python 3.11 (para execução local)
+- Docker e `docker-compose` (para execução via contêiner)
+- Arquivo `.env` com as variáveis descritas abaixo
 
 ## Variáveis de ambiente
-
-Crie um arquivo `.env` com as variáveis abaixo (exemplo):
+Exemplo de `.env` (não comitar em repositório público):
 
 ```
-DATABASE_URL=sqlite:///./test.db
+DATABASE_URL=postgresql://user:password@db:5432/todo_db
 SECRET_KEY=uma_chave_forte_aqui
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
-REFRESH_TOKEN_EXPIRE_MINUTES=7
+REFRESH_TOKEN_EXPIRE_MINUTES=10080
 ```
 
-> Observação: ajuste `DATABASE_URL` para Postgres ou outro banco conforme necessário.
+Observações:
+- Em execuções via `docker-compose` o host do banco deve ser `db` (nome do serviço no compose).
+- Para SQLite use `sqlite:///./test.db` em desenvolvimento.
 
-## Instalação
-
-1. Crie e ative um ambiente virtual (recomendado):
-
+## Instalação (local)
+1. Crie e ative um virtualenv:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
-
-2. Instale dependências:
-
+2. Instale dependências (escolha um):
 ```bash
-pip install -r requeriments.txt
+# Com Poetry
+poetry install
+
+# Ou com pip (se houver requirements.txt)
+pip install -r requirements.txt
 ```
-
-3. Configure o arquivo `.env` com as variáveis acima.
-
-## Execução
-
-Execute a API com Uvicorn (modo desenvolvimento):
-
+3. Configure `.env`.
+4. Rode em modo desenvolvimento:
 ```bash
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-A documentação interativa estará disponível em `/docs` (Swagger) e `/redoc`.
+## Uso com Docker
+O projeto contém um `Dockerfile` e um `docker-compose.yaml` para orquestração com Postgres.
 
-## Endpoints principais
-
-- Health check: `GET /` — retorna `{"msg": "OK"}`
-- Autenticação:
-  - `POST /auth/token` — login com `username` (email) e `password` (OAuth2PasswordRequestForm). Retorna `access_token` e `refresh_token`.
-  - `POST /auth/refresh/token` — receber novo par de tokens usando `refresh_token` (schema `RefreshTokenIn`).
-  - `GET /auth/me` — retorna dados do usuário atual (token de acesso necessário).
-- Tarefas (protegido): prefixo ` /api/tarefa`
-  - `POST /api/tarefa/` — criar tarefa
-  - `GET /api/tarefa/listar` — listar tarefas do usuário autenticado
-  - `GET /api/tarefa/{tarefa_id}` — obter tarefa por id
-  - `PUT /api/tarefa/{tarefa_id}` — atualizar tarefa completa
-  - `PATCH /api/tarefa/{tarefa_id}` — atualização parcial
-  - `DELETE /api/tarefa/{tarefa_id}` — deletar tarefa
-
-- Usuários: routers de CRUD incluídos (ver `app.crud`)
-
-Exemplo de autenticação (curl):
-
+Com docker-compose (rebuild):
 ```bash
-curl -X POST "http://localhost:8000/auth/token" -F "username=seu@email.com" -F "password=sua_senha"
+docker-compose -f docker-compose.yaml up --build -d
 ```
 
-## Modelos (resumo)
+Build e execução manual:
+```bash
+docker build -t todolist-backend .
+docker run --env-file .env -p 8000:8000 todolist-backend
+```
 
-- `User` (`app/models/model_user.py`): `id`, `nome`, `email`, `password`, `criado`.
-- `Tarefa` (`app/models/model_tarefa.py`): `id`, `nome`, `descricao`, `concluida`, `data`, `prazo`, `data_conclusao`, `usuario_id`.
+Notas importantes sobre Docker:
+- No `docker-compose.yaml` garanta que o volume do Postgres esteja mapeado para `/var/lib/postgresql/data`.
+- Use um arquivo `.dockerignore` para evitar copiar arquivos desnecessários (ex.: `.venv`, `.git`, `__pycache__`, `tests`, `.env`).
+- Em produção prefira builds multi-stage, fixar versão do `poetry` (se usado), criar um usuário não-root e usar um servidor de aplicação como `gunicorn` com workers do `uvicorn`.
 
-## Observações de segurança
+Exemplo mínimo de `.dockerignore` recomendado:
+```
+.venv
+__pycache__
+*.pyc
+.git
+.env
+tests
+```
 
-- Senhas são armazenadas hasheadas (ver `app.core.security`).
-- Tokens de refresh são armazenados em banco com hash e podem ser revogados.
+## Estrutura do projeto (resumida)
+- `app/main.py` — inicialização e inclusão de routers
+- `app/core/` — configurações, segurança e handlers
+- `app/db/` — configuração do SQLAlchemy (`database.py`)
+- `app/models/` — modelos ORM (`User`, `Tarefa`)
+- `app/crud/` — operações de CRUD
+- `app/routers/` — routers (autenticação, tarefas, usuários)
+- `app/services/` — lógica de negócio
+- `app/schemas/` — Pydantic schemas
+
+## Endpoints principais
+- Health: `GET /` → `{"msg": "OK"}`
+- Auth:
+  - `POST /auth/token` — login (form: `username`, `password`)
+  - `POST /auth/refresh/token` — renovar tokens com refresh token
+  - `GET /auth/me` — dados do usuário autenticado
+- Tarefas (protegido, prefixo `/api/tarefa`): CRUD padrão (`POST`, `GET`, `PUT`, `PATCH`, `DELETE`)
+
+Consulte as rotas reais no código (`app/routers/`) e a documentação interativa em `/docs`.
+
+## Observações para produção
+- Não exponha `.env` no repositório; use secrets do provedor de nuvem.
+- Fixe versões do Poetry e dependências para reprodutibilidade.
+- Use multi-stage builds para reduzir imagem final e remover ferramentas de build.
+- Execute com Gunicorn + Uvicorn workers ou configure workers do Uvicorn para escalabilidade.
+- Crie usuário não-root na imagem Docker.
+- Configure healthchecks, logs e monitore recursos no ambiente de hospedagem.
 
 ## Contribuição
-
-Fique à vontade para abrir issues e pull requests. Para contribuições:
-
-1. Fork do repositório
+1. Fork
 2. Branch com feature/fix
-3. Abra PR descrevendo mudanças
+3. PR descrevendo mudanças
 
 ## Licença
-
-Coloque aqui o tipo de licença (ex.: MIT) se desejar.
+Adicione a licença desejada (ex.: MIT) no repositório.
 
 ## Contato
-
-Para dúvidas ou suporte, abra uma issue no repositório.
+Abra uma issue para dúvidas ou suporte.
