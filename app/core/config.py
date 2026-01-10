@@ -11,5 +11,8 @@ class Settings:
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
     )
     REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv('REFRESH_TOKEN_EXPIRE_DAYS', 7))
+    POSTGRES_USER = os.getenv("POSTGRES_USER")
+    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+    POSTGRES_DB = os.getenv("POSTGRES_DB")
 
 settings = Settings()

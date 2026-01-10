@@ -14,3 +14,4 @@ class User(Base):
     criado = Column(DateTime, default=lambda: datetime.now().replace(microsecond=0))
 
     tarefas = relationship("Tarefa", back_populates="usuario", cascade="all, delete-orphan")
+    tokens = relationship("Token", back_populates="user", cascade="all, delete-orphan")

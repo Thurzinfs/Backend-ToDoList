@@ -1,0 +1,45 @@
+# Arquivos Python desnecessários
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Ambientes virtuais
+.venv/
+venv/
+ENV/
+env/
+
+# IDE e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Docker (não precisa copiar para dentro do container)
+Dockerfile
+.dockerignore
+
+# Testes e cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Variáveis de ambiente locais
+.env
+.env.local
+
+# Logs
+*.log
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
