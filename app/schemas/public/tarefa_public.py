@@ -10,5 +10,6 @@ class TarefaPublic(BaseModel):
     concluida: bool
     data: datetime
     prazo: date
+    prioridade: str
     data_conclusao: Optional[datetime] = None
     usuario_id: int

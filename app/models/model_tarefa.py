@@ -12,6 +12,7 @@ class Tarefa(Base):
 
     data = Column(DateTime, default=datetime.utcnow, nullable=False)
     prazo = Column(Date, nullable=False)
+    prioridade = Column(String, nullable=False)
     data_conclusao = Column(DateTime, nullable=True)
     usuario_id = Column(Integer, ForeignKey('users.id'))
 

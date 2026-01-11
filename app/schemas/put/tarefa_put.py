@@ -6,4 +6,5 @@ class TarefaPut(BaseModel):
     descricao: str
     concluida: bool
     prazo: date
+    prioridade: str
     data_conclusao: datetime

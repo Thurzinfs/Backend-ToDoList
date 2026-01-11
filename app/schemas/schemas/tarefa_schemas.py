@@ -5,4 +5,5 @@ class TarefaSchemas(BaseModel):
     nome: str
     descricao: str
     prazo: date
+    prioridade: str
     concluida: bool

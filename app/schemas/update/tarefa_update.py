@@ -7,4 +7,5 @@ class TarefaUpdate(BaseModel):
     descricao: Optional[str] = None
     concluida: Optional[bool] = None
     prazo: Optional[date] = None
+    prioridade: Optional[str] = None
     data_conclusao: Optional[datetime] = None

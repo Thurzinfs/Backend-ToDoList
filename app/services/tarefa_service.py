@@ -11,6 +11,7 @@ def service_criar_tarefa(tarefa_data : TarefaSchemas, session: Session, current_
         nome = tarefa_data.nome,
         descricao = tarefa_data.descricao,
         prazo = tarefa_data.prazo,
+        prioridade = tarefa_data.prioridade,
         concluida = tarefa_data.concluida,
         usuario_id = current_user.id
     )
@@ -45,6 +46,7 @@ def service_atualizar_tarefa(tarefa_id: int, data: TarefaPut, session: Session):
         tarefa.nome = data.nome
         tarefa.descricao = data.descricao
         tarefa.prazo = data.prazo
+        tarefa.prioridade = data.prioridade
         tarefa.data_conclusao = data.data_conclusao
         tarefa.concluida = data.concluida
 
