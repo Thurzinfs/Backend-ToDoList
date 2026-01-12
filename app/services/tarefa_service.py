@@ -47,7 +47,6 @@ def service_atualizar_tarefa(tarefa_id: int, data: TarefaPut, session: Session):
         tarefa.descricao = data.descricao
         tarefa.prazo = data.prazo
         tarefa.prioridade = data.prioridade
-        tarefa.data_conclusao = data.data_conclusao
         tarefa.concluida = data.concluida
 
         session.commit()

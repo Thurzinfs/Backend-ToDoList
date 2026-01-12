@@ -8,7 +8,7 @@ from app.core.security import verify_password, create_access_token, create_refre
 from app.schemas.token.schema_token import Token as TokenPublic
 from app.schemas.schemas.refresh_token import RefreshTokenIn
 from app.core.security import get_current_user
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from http import HTTPStatus
 import jwt
@@ -87,7 +87,7 @@ def refresh_token(
         if not token_db:
             raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Refresh token revoked or not found")
 
-        if token_db.expire_at < datetime.utcnow():
+        if token_db.expire_at < datetime.now(timezone.utc):
             raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Refresh token expired")
         
         session.query(Token).filter(Token.user_id == int(user_id), Token.revoked == False).update({Token.revoked: True}, synchronize_session=False)        
